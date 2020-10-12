@@ -128,7 +128,7 @@ def main():
     robot_obj = triad_openvr.vr_tracked_device(v.vr,1,"Controller") #Instantiates the object
     robot_input = robot_obj.get_controller_inputs() #Calling the method for htc inputs
     #prompt the user to get alligned with the base station
-    
+    #have a function to display the co-ordinates so that the user can align to the co-ords. 
     #TODO: How do I know if the switch is on or off like the toggle?
     #TODO: Create specific scneraios for the robot using different buttons: 1) Gripping 2) fine grain. 
     if(robot_input['menu_button']): 
