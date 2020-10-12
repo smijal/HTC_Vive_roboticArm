@@ -63,7 +63,7 @@ def teaching_mode(st_robot,v,obj):
                 #TODO: add a function for the gripper J6 to controll the gripper within fine grain
                 
                 try:
-                    
+                    #Take the displacement into consideration (one variable to save the previous position, add the displacement to the prev position)
                     pos_val = txt #collects the x,y,z
                     st_robot.move_to(pos_val) #tells the robot to move to that x,y,z position
                     time.sleep(0.4)
@@ -72,7 +72,9 @@ def teaching_mode(st_robot,v,obj):
                     st_robot.rotate_hand(txt[4]) #rotates the hand using the pitch 
                     time.sleep(0.4)
                 except:
-                    ('Error in the teaching function')
+                    print('Error in the teaching function')
+                    #call stop function
+                    #exit
             print("\r" + txt, end="")
             sleep_time = interval-(time.time()-start)
             if sleep_time>0:
@@ -125,7 +127,7 @@ def main():
     st_robot = arm.StArm()
     robot_obj = triad_openvr.vr_tracked_device(v.vr,1,"Controller") #Instantiates the object
     robot_input = robot_obj.get_controller_inputs() #Calling the method for htc inputs
-    
+    #prompt the user to get alligned with the base station
     
     #TODO: How do I know if the switch is on or off like the toggle?
     #TODO: Create specific scneraios for the robot using different buttons: 1) Gripping 2) fine grain. 
