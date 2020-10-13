@@ -177,7 +177,8 @@ def main():
     filename = os.path.join(final_directory, "coords" + str(num_paths) + ".txt")   
     f = open(filename, "w+") #collects the co-ords in a text file.
 
-    #prompt the user to get alligned with the base station
+    #prompt the user to get alligned with the base station -DONE??
+    print_cords(v) 
     #have a function to display the co-ordinates so that the user can align to the co-ords. 
     #TODO: How do I know if the switch is on or off like the toggle?
     #TODO: Create specific scneraios for the robot using different buttons: 1) Gripping 2) fine grain.
