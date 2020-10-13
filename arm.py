@@ -230,9 +230,9 @@ In [36]:
         self.where()
 
     def rotate_hand(self, pitch):
-        cmd = TELL + ' ' + HAND + ' ' + str(pitch) + ' ' + MOVETO
+        cmd = 'TELL' + ' ' + 'HAND' + ' ' + str(pitch) + ' ' + 'MOVETO'
         self.cxn.flushInput()
-        self.cxn.write(cmd + CR)
+        self.cxn.write(cmd.encode() + CR)
         self.block_on_result(cmd)
         self.cartesian()
         self.where()

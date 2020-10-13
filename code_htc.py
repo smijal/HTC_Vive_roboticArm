@@ -10,8 +10,11 @@ import sys
 import arm
 import os
 
+current_posX = 0.0
+robot_position = [-310.0,303.3,169.2]
+
 #st_robot is taken out
-def teaching_mode(v,obj,f):
+def teaching_mode(v,obj,f, interval,a):
     # """
     # This function focuses on collecting the co-ordinates and sending the co-ordinates to the robot for visual input.
     # The co-ordinates are more over stored in a text file so that we can call the Replication function later.
@@ -37,37 +40,56 @@ def teaching_mode(v,obj,f):
     #st_robot.rotate_hand(initial_pos[3]) #rotates the hand using the pitch 
     #time.sleep(0.4)
     #start = time.time()
-    txt = ""
-    for each in v.devices["controller_1"].get_pose_euler():
-        txt += "%.4f" % each
-        txt += " "
-        #x,y,z,yaw,pitch and roll 
-    f.write(txt+'\n') #writes into the file 
-    robot_input = obj.get_controller_inputs() #Calling the method for htc inputs
-    if(robot_input['trackpad_pressed'] and robot_input['trackpad_y']<-0.8):
-        print("Fine grain")
-        time.sleep(0.3)
-        #st_robot.set_speed(1200)
-        
-        #: add a function for the gripper J6 to controll the gripper within fine grain
-        
-        # try:
-        #     #Take the displacement into consideration (one variable to save the previous position, add the displacement to the prev position)
-        #     pos_val = txt #collects the x,y,z
-        #     st_robot.move_to(pos_val) #tells the robot to move to that x,y,z position
-        #     time.sleep(0.4)
-        #     st_robot.rotate_wrist(txt[5]) #rotates the wrist using the roll
-        #     time.sleep(0.4)
-        #     st_robot.rotate_hand(txt[4]) #rotates the hand using the pitch 
-        #     time.sleep(0.4)
-        # except:
-        #     print('Error in the teaching function')
-        #     #call stop function
-        #     #exit
-    print("\r" + txt, end="")
-    # sleep_time = interval-(time.time()-start)
+    global current_posX
+    global robot_position
+    vive_position = v.devices["controller_1"].get_pose_euler()
+    if(vive_position==None):
+        print("NONE")
+    else:
+        displacementX = current_posX-vive_position[0]
+        current_posX = vive_position[0]
+        #print(displacementX)
+        if(abs(displacementX*250) < 20):
+            print("Displacement too small")
+        else:
+            robot_position[0] = robot_position[0]+displacementX*250
+            robot_position[0] = round(robot_position[0],1)
+            a.move_to(robot_position)
+            print(robot_position)
+        time.sleep(0.2)
+    # sleep_time = interval-(time.time()-start) 
     # if sleep_time>0:
-    #     time.sleep(sleep_time)       
+    #     time.sleep(sleep_time)
+
+    # txt = ""
+    # for each in v.devices["controller_1"].get_pose_euler():
+    #     txt += "%.4f" % each
+    #     txt += " "
+    #     #x,y,z,yaw,pitch and roll 
+    # f.write(txt+'\n') #writes into the file 
+    # robot_input = obj.get_controller_inputs() #Calling the method for htc inputs
+    # if(robot_input['trackpad_pressed'] and robot_input['trackpad_y']<-0.8):
+    #     print("Fine grain")
+    #     time.sleep(0.3)
+    #     #st_robot.set_speed(1200)
+        
+    #     #: add a function for the gripper J6 to controll the gripper within fine grain
+        
+    #     # try:
+    #     #     #Take the displacement into consideration (one variable to save the previous position, add the displacement to the prev position)
+    #     #     pos_val = txt #collects the x,y,z
+    #     #     st_robot.move_to(pos_val) #tells the robot to move to that x,y,z position
+    #     #     time.sleep(0.4)
+    #     #     st_robot.rotate_wrist(txt[5]) #rotates the wrist using the roll
+    #     #     time.sleep(0.4)
+    #     #     st_robot.rotate_hand(txt[4]) #rotates the hand using the pitch 
+    #     #     time.sleep(0.4)
+    #     # except:
+    #     #     print('Error in the teaching function')
+    #     #     #call stop function
+    #     #     #exit
+    # print("\r" + txt, end="")
+       
     return f
 
 #st_robot is taken out
@@ -128,6 +150,11 @@ def switchMode(modes, currMode):
         count+=1
 
 def main():
+    global robot_position
+    a = arm.StArm()
+    a.move_to(robot_position)
+    a.rotate_hand(30.0)
+
     #Variables 
     system_ON = False
     modes = ['Teaching', 'Save', 'Replicating', 'Stop']
@@ -165,7 +192,7 @@ def main():
         while(True):
             vive_buttons = controller.get_controller_inputs() #Calling the method for htc inputs  
             if(vive_buttons['menu_button']): 
-                time.sleep(0.6)
+                time.sleep(0.4)
                 system_ON=turn_ON_OFF(system_ON, currMode)
             if(system_ON):
                 if(vive_buttons['grip_button']):
@@ -175,7 +202,7 @@ def main():
                         filename = os.path.join(final_directory, "coords" + str(num_paths) + ".txt")   
                         f = open(filename, "w+") #collects the co-ords in a text file.
                         num_paths+=1
-                    f=teaching_mode(v,controller,f)
+                    f=teaching_mode(v,controller,f, interval,a)
                 if(currMode==modes[1] or currMode==modes[3]):
                     if(not f.closed):
                         f.close() 
@@ -189,5 +216,4 @@ def main():
 if __name__ == "__main__":
    main()
 
-    
     
