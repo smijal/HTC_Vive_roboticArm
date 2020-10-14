@@ -2,7 +2,7 @@
 # """
 # Created on Fri Oct  2 21:31:04 2020
 
-# @author: Lohith Muppala
+# @authors: Lohith Muppala and Stefan Mijalkov
 # """
 import triad_openvr
 import time

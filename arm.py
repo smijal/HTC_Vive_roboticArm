@@ -38,6 +38,8 @@ MOVE = str.encode('MOVE')
 CARTESIAN_NEW_ROUTE = str.encode('CARTESIAN NEW ROUTE')
 RESERVE = str.encode('RESERVE')
 OK = str.encode('OK')
+GRIP = str.encode('GRIP')
+UNGRIP = str.encode('UNGRIP')
 
 
 class StPosCart():
@@ -124,7 +126,23 @@ In [36]:
         self.cxn.flushInput()
         self.cxn.write(cmd + CR)
         self.block_on_result(cmd)
-
+    #added this for grip and ungrip 
+    #depending on the functionality I might add the TGRIP
+   
+    def grip(self):
+        cmd = GRIP
+        print('Gripping the object')
+        self.cxn.flushInput()
+        self.cxn.write(cmd + CR)
+        self.block_on_result(cmd)
+    #added this - LM
+    def ungrip(self):
+        cmd = UNGRIP
+        print('Un-gripping the object')
+        self.cxn.flushInput()
+        self.cxn.write(cmd + CR)
+        self.block_on_result(cmd)
+        
     def joint(self):
         cmd = JOINT
         print('Setting Joint mode...')
@@ -186,6 +204,7 @@ In [36]:
         self.cxn.write(cmd.encode() + CR)
         self.block_on_result(cmd)
 
+
     def get_accel(self):
         cmd = ACCEL + QUERY
         self.cxn.flushInput()
@@ -194,10 +213,10 @@ In [36]:
         return int(result.split(' ')[-2])
 
     def set_accel(self, accel):
-        cmd = str(accel) + ' ' + ACCEL + IMPERATIVE
+        cmd = str(accel) + ' ' + ACCEL.decode() + IMPERATIVE.decode()
         print('Setting acceleration to %d' % accel)
         self.cxn.flushInput()
-        self.cxn.write(cmd + CR)
+        self.cxn.write(cmd.encode() + CR)
         self.block_on_result(cmd)
 
     def move_to(self, pos, block=True):
@@ -211,36 +230,36 @@ In [36]:
     def move(self, del_pos):
         cmd = str(del_pos[0]) + ' ' + str(del_pos[1]) + ' ' + str(del_pos[2]) + ' MOVE'
         self.cxn.flushInput()
-        self.cxn.write(cmd + CR)
+        self.cxn.write(cmd.encode() + CR)
         self.block_on_result(cmd)
         self.where()
 
     def rotate_wrist(self, roll):
-        cmd = TELL + ' ' + WRIST + ' ' + str(roll) + ' ' + MOVETO
+        cmd = TELL.decode() + ' ' + WRIST.decode() + ' ' + str(roll) + ' ' + MOVETO.decode()
         self.cxn.flushInput()
-        self.cxn.write(cmd + CR)
+        self.cxn.write(cmd.encode() + CR)
         self.block_on_result(cmd)
 
     def rotate_wrist_rel(self, roll_inc):
-        cmd = TELL + ' ' + WRIST + ' ' + str(roll_inc) + ' ' + MOVE
+        cmd = TELL.decode() + ' ' + WRIST.decode() + ' ' + str(roll_inc) + ' ' + MOVE.decode()
         self.cxn.flushInput()
-        self.cxn.write(cmd + CR)
+        self.cxn.write(cmd.encode() + CR)
         self.block_on_result(cmd)
         self.cartesian()
         self.where()
 
     def rotate_hand(self, pitch):
-        cmd = TELL + ' ' + HAND + ' ' + str(pitch) + ' ' + MOVETO
+        cmd = TELL.decode() + ' ' + HAND.decode() + ' ' + str(pitch) + ' ' + MOVETO.decode()
         self.cxn.flushInput()
-        self.cxn.write(cmd + CR)
+        self.cxn.write(cmd.encode() + CR)
         self.block_on_result(cmd)
         self.cartesian()
         self.where()
 
     def rotate_hand_rel(self, pitch_inc):
-        cmd = TELL + ' ' + HAND + ' ' + str(pitch_inc) + ' ' + MOVE
+        cmd = TELL.decode() + ' ' + HAND.decode() + ' ' + str(pitch_inc) + ' ' + MOVE.decode()
         self.cxn.flushInput()
-        self.cxn.write(cmd + CR)
+        self.cxn.write(cmd.encode() + CR)
         self.block_on_result(cmd)
         self.cartesian()
         self.where()
