@@ -146,7 +146,7 @@ def switchMode(modes, currMode):
 # Purpose: Main function, controlls the other function calls and operates the system
 # Parameters: None
 # Returns: None
-#--------------------------------------------------
+#-------------------------------------------------- 
 def main():
     #Instantiate the robotic arm object, set it to the convinient position for start.
     global robot_position
@@ -159,13 +159,14 @@ def main():
     modes = ['Teaching', 'Save', 'Replicating', 'Stop']
     currMode = modes[1]
 
+    #TODO: Create a file that stores the previous num_paths (Example: 5 files are stored already, (file0 to file4), take the value stored and continue from there)
     num_paths = 0 #useful for creating more than one file (ex: file0, file1 ...)
 
     #Vive controller and tracker objects
     v = triad_openvr.triad_openvr()
     v.print_discovered_objects()
     controller = triad_openvr.vr_tracked_device(v.vr,1,"Controller") #Instantiates the object
-    
+
     #To create a new directory for saving the different coordinate files
     current_directory = os.getcwd()
     final_directory = os.path.join(current_directory, r'movement_paths')
