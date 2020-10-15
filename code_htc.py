@@ -23,6 +23,11 @@ import sys
 import arm
 import os
 
+import tkinter as tk
+from tkinter import * 
+import os
+from PIL import Image,ImageTk
+
 #GLOBAL VARIABLES FOR NOW, MOSTLY FOR TESTING PURPOSES
 current_posX = 0.0
 robot_position = [-310.0,303.3,169.2]
@@ -147,7 +152,8 @@ def switchMode(modes, currMode):
 # Parameters: None
 # Returns: None
 #-------------------------------------------------- 
-def main():
+def code_main():
+    
     #Instantiate the robotic arm object, set it to the convinient position for start.
     global robot_position
     # a = arm.StArm()
@@ -213,6 +219,48 @@ def main():
                     currMode=switchMode(modes,currMode)
             else:
                 print("System is OFF, press the MENU button to turn it ON", end='\r')
+
+def main():
+    root = tk.Tk() # instantiating the window
+    entry1 = StringVar() #assigning a variable for the text entry
+    
+    root.poll = True #toggle variable
+    
+    root.title('Motion Controll Robot GUI') #naming the window
+    root.configure(background='black')
+    root.minsize(width=100, height=100)
+    root.geometry('450x500+0+0') #setting the size of the window 
+    title = Label(root,text = 'Motion Controlled Robot',bg= 'black', fg = 'White',font = ('Verdana',27))
+    title.pack(anchor = CENTER)
+    
+    
+    #bringing the image. 
+    print(current_directory)
+    im_path = os.path.join(current_directory, 'pic.png')
+    im = Image.open(im_path)
+    im = im.resize((180, 180),Image.ANTIALIAS)
+    ph = ImageTk.PhotoImage(im)
+    image = Label(root, image=ph, highlightthickness = 0, bd = 0)
+    image.pack(side = 'top')
+    
+    
+    coms = Label(root,bg ='black', fg = 'white', text = 'COM Port: ',font = ('Verdana',15))
+    coms.pack(anchor = CENTER)
+    Entry(root,width = 30,textvariable = entry1,justify = 'center').pack(anchor = CENTER)
+    
+    coms_button = Button(root,text = 'OK',width = 9, height = 1,command = comport)
+    coms_button.pack(anchor = CENTER,padx = 2, pady = 3)
+    
+    steam = Button(root,text = 'Run Program',bg = 'Green',command = code_main)
+    steam.place(x = 90, y = 320,width = 100, height = 50)
+    
+    stop_btn = Button(root,text = 'STOP',bg = 'Red',command = stop)
+    stop_btn.place(x = 250, y = 320,width = 100, height = 50)
+    
+    help_btn = Button(root,text = 'Help Guide',command = helper)
+    help_btn.place(x = 170, y = 390,width = 100, height = 50)
+    
+    root.mainloop()
 
 if __name__ == "__main__":
    main()
