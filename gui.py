@@ -8,8 +8,10 @@ import tkinter as tk
 from tkinter import * 
 import os
 from PIL import Image,ImageTk
+current_directory = os.getcwd()
+filepath = current_directory + '\Documentation.pdf'
 
-
+print(filepath)
 
 
 #stop function to stop the GUI
@@ -26,8 +28,8 @@ def run():
         
 #launches the Helper guide 
 def helper():
-    root.poll = False
     print('Help guide launching...')
+    os.startfile(filepath)
 
 
     
