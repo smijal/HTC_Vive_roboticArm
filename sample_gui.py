@@ -15,8 +15,8 @@ import triad_openvr
 import arm
 import code_htc
 
-current_directory = os.getcwd()
-filepath_document = current_directory + '\Documentation.pdf'
+current_directory = os.path.dirname(os.path.abspath(__file__))
+filepath_document = os.path.join(current_directory , 'Documentation.pdf')
 
 
 #stop function to stop the GUI

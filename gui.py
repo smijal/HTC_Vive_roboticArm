@@ -2,7 +2,7 @@
 """
 Created on Wed Oct 14 23:29:17 2020
 
-@author: Lohith Muppala 
+@author: Lohith Muppala , Stefan Mijalkov, Ali Kazmi, Joshua Zychal
 """
 import tkinter as tk
 from tkinter import * 
@@ -37,6 +37,7 @@ controller = triad_openvr.vr_tracked_device(v.vr,1,"Controller") #Instantiates t
 
 #To create a new directory for saving the different coordinate files
 current_directory = os.path.dirname(os.path.abspath(__file__))
+filepath_document = os.path.join(current_directory , 'Documentation.pdf')
 final_directory = os.path.join(current_directory, r'movement_paths')
 if not os.path.exists(final_directory):
     os.makedirs(final_directory)
@@ -81,7 +82,7 @@ def teaching_mode(v,obj,f, interval):
             robot_position[0] = round(robot_position[0]+displacementX*250, 1)
             #a.move_to(robot_position)
             print(robot_position)
-        time.sleep(0.1)
+        time.sleep(0.2)
     # sleep_time = interval-(time.time()-start) 
     # if sleep_time>0:
     #     time.sleep(sleep_time)
@@ -179,7 +180,7 @@ def switchMode(modes, currMode):
 #-------------------------------------------------- 
 def main():
     #TODO: Instead of printing on the console, print on the GUI Window
-    global robot_position, system_ON, modes, currMode, num_paths, v, controller, final_directory, interval, filename, f
+    global robot_position, system_ON, modes, currMode, num_paths, v, controller, final_directory, interval, filename, f, filepath_document
     
     if root.poll:
         root.after(2,main)
@@ -207,6 +208,7 @@ def main():
         else:
             print("System is OFF, press the MENU button to turn it ON", end='\r')
 
+
 #################################### GUI FUNCTIONS AND CONTROLLS ###########################################
 #stop function to stop the GUI
 def stop():
@@ -217,7 +219,7 @@ def stop():
 #launches the Helper guide 
 def helper():
     print('Help guide launching...')
-    os.startfile(filepath)
+    os.startfile(filepath_document)
 
 #COM port setter
 #TODO: Check in person if this actually works
@@ -266,7 +268,7 @@ steam.place(x = 90, y = 320,width = 100, height = 50)
 stop_btn = Button(root,text = 'STOP',bg = 'Red',command = stop)
 stop_btn.place(x = 250, y = 320,width = 100, height = 50)
 
-help_btn = Button(root,text = 'Help Guide',command = help)
+help_btn = Button(root,text = 'Help Guide',command = helper)
 help_btn.place(x = 170, y = 390,width = 100, height = 50)
 
 root.mainloop()
