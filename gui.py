@@ -187,7 +187,7 @@ def main():
     if(interval):
         vive_buttons = controller.get_controller_inputs() #Calling the method for htc inputs  
         if(vive_buttons['menu_button']): 
-            time.sleep(0.4)
+            time.sleep(0.3)
             system_ON=turn_ON_OFF(system_ON, currMode)
         if(system_ON):
             if(vive_buttons['grip_button']):
