@@ -35,7 +35,7 @@ robot_position = [-310.0,303.3,169.2]
 #     
 # Returns: f -> text file that has been updated
 #-------------------------------------------------------------
-def teaching_mode(v,obj,f, interval,a):
+def teaching_mode(v,obj,f, interval):
     #start = time.time()
     global current_posX
     global robot_position
@@ -45,13 +45,13 @@ def teaching_mode(v,obj,f, interval,a):
     else:
         displacementX = current_posX-vive_position[0]
         current_posX = vive_position[0]
-        if(abs(displacementX*250) < 20):
+        if(abs(displacementX*250) < 8):
             print("Displacement too small")
         else:
             robot_position[0] = round(robot_position[0]+displacementX*250, 1)
-            a.move_to(robot_position)
+            #a.move_to(robot_position)
             print(robot_position)
-        time.sleep(0.2)
+        time.sleep(0.3)
     # sleep_time = interval-(time.time()-start) 
     # if sleep_time>0:
     #     time.sleep(sleep_time)
@@ -150,9 +150,9 @@ def switchMode(modes, currMode):
 def main():
     #Instantiate the robotic arm object, set it to the convinient position for start.
     global robot_position
-    a = arm.StArm()
-    a.move_to(robot_position)
-    a.rotate_hand(30.0)
+    # a = arm.StArm()
+    # a.move_to(robot_position)
+    # a.rotate_hand(30.0)
 
     #default system state, and mode (System OFF, Mode: Save)       
     system_ON = False
@@ -168,7 +168,7 @@ def main():
     controller = triad_openvr.vr_tracked_device(v.vr,1,"Controller") #Instantiates the object
 
     #To create a new directory for saving the different coordinate files
-    current_directory = os.getcwd()
+    current_directory = os.path.dirname(os.path.abspath(__file__))
     final_directory = os.path.join(current_directory, r'movement_paths')
     if not os.path.exists(final_directory):
         os.makedirs(final_directory)
@@ -204,7 +204,7 @@ def main():
                         filename = os.path.join(final_directory, "coords" + str(num_paths) + ".txt")   
                         f = open(filename, "w+") #Open new text file in write mode
                         num_paths+=1
-                    f=teaching_mode(v,controller,f, interval,a)
+                    f=teaching_mode(v,controller,f, interval)
                 if(currMode==modes[1] or currMode==modes[3]):
                     if(not f.closed):
                         f.close() 
