@@ -2,7 +2,7 @@
 """
 Created on Wed Oct 14 23:29:17 2020
 
-@author: Lohith Muppala , Stefan Mijalkov, Ali Kazmi, Joshua Zychal
+@authors: Lohith Muppala, Stefan Mijalkov, Ali Kazmi, Joshua Zychal
 """
 import tkinter as tk
 from tkinter import * 
@@ -16,24 +16,32 @@ import code_htc
 
 
 ############# GLOBAL VARIABLES, THIS MIGHT BE THE ONLY OPTION SINCE WE ARE USING GUI ############
-current_posX = 0.0
-robot_position = [-310.0,303.3,169.2]
-# a = arm.StArm()
-# a.move_to(robot_position)
-# a.rotate_hand(30.0)
-
 #default system state, and mode (System OFF, Mode: Save)       
 system_ON = False
 modes = ['Teaching', 'Save', 'Replicating', 'Stop']
 currMode = modes[1]
 
-#TODO: Create a file that stores the previous num_paths (Example: 5 files are stored already, (file0 to file4), take the value stored and continue from there)
-num_paths = 0 #useful for creating more than one file (ex: file0, file1 ...)
-
 #Vive controller and tracker objects
 v = triad_openvr.triad_openvr()
 v.print_discovered_objects()
 controller = triad_openvr.vr_tracked_device(v.vr,1,"Controller") #Instantiates the object
+
+vive_position = v.devices["controller_1"].get_pose_euler()
+print("Checking connection Controller-Base Station...")
+while(not vive_position):
+    vive_position = v.devices["controller_1"].get_pose_euler()
+print("Connection ready !")
+current_posX = vive_position[0]
+current_posY = vive_position[1]
+current_posZ = vive_position[2]
+robot_position = [-310.0,303.0,170.0]
+# a = arm.StArm()
+# a.move_to(robot_position)
+# a.rotate_hand(30.0)
+
+rest_time=0.2
+tunning = 400
+lim = tunning/20
 
 #To create a new directory for saving the different coordinate files
 current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -41,6 +49,10 @@ filepath_document = os.path.join(current_directory , 'Documentation.pdf')
 final_directory = os.path.join(current_directory, r'movement_paths')
 if not os.path.exists(final_directory):
     os.makedirs(final_directory)
+
+#TODO: Create a file that stores the previous num_paths (Example: 5 files are stored already, (file0 to file4), take the value stored and continue from there)
+num_paths = len(os.listdir(final_directory))
+
 
 #to open a new text file in the new directory
 filename = os.path.join(final_directory, "coords" + str(num_paths) + ".txt")   
@@ -68,21 +80,35 @@ else:
 #-------------------------------------------------------------
 def teaching_mode(v,obj,f, interval):
     #start = time.time()
-    global current_posX
-    global robot_position
+    global current_posX,current_posY, current_posZ, robot_position, rest_time,tunning,lim
     vive_position = v.devices["controller_1"].get_pose_euler()
     if(vive_position==None):
         print("Vive can't read, make sure the controller and the base station can communicate...")
     else:
         displacementX = current_posX-vive_position[0]
+        displacementY = current_posY-vive_position[1]
+        displacementZ = current_posZ-vive_position[2]
         current_posX = vive_position[0]
-        if(abs(displacementX*250) < 8):
+        current_posY = vive_position[1]
+        current_posZ = vive_position[2]
+        if( (abs(displacementX*tunning) < lim) and (abs(displacementY*tunning)<lim) and (abs(displacementZ*tunning)<lim) ):
             print("Displacement too small")
         else:
-            robot_position[0] = round(robot_position[0]+displacementX*250, 1)
-            #a.move_to(robot_position)
-            print(robot_position)
-        time.sleep(0.2)
+            robot_position[0] = round(robot_position[0]+displacementX*tunning, 1)
+            robot_position[1] = round(robot_position[1]+displacementY*tunning,1)
+            robot_position[2] = round(robot_position[2]+displacementZ*tunning,1)
+            try:
+                #a.move_to(robot_position)
+                print(robot_position)
+                txt=""
+                for each in robot_position:
+                    txt += "%.1f" % each
+                    txt+=" "
+                #txt+=str(robot_position[0]) + ", " + str(robot_position[1]) + ", " + str(robot_position[2]) + "\n"
+                f.write(txt+'\n')
+            except:
+                print("Error in teaching function...")
+        
     # sleep_time = interval-(time.time()-start) 
     # if sleep_time>0:
     #     time.sleep(sleep_time)
@@ -94,8 +120,8 @@ def teaching_mode(v,obj,f, interval):
     #     #x,y,z,yaw,pitch and roll 
     # f.write(txt+'\n') #writes into the file 
     # robot_input = obj.get_controller_inputs() #Calling the method for htc inputs
-    # if(robot_input['trackpad_pressed'] and robot_input['trackpad_y']<-0.8):
-    #     print("Fine grain")
+
+    time.sleep(rest_time)
     #     time.sleep(0.3)
     #     #st_robot.set_speed(1200)
         
@@ -181,7 +207,6 @@ def switchMode(modes, currMode):
 def main():
     #TODO: Instead of printing on the console, print on the GUI Window
     global robot_position, system_ON, modes, currMode, num_paths, v, controller, final_directory, interval, filename, f, filepath_document
-    
     if root.poll:
         root.after(2,main)
     #Main controll, polling and wait for Vive button triggers to perform different functionalities
@@ -194,6 +219,16 @@ def main():
             if(vive_buttons['grip_button']):
                 currMode=switchMode(modes,currMode)
             if(currMode=="Teaching"):
+                if(vive_buttons['trackpad_pressed'] and vive_buttons['trackpad_y']<-0.8):
+                    print("Fine grain")
+                    #f.write("FINE GRAIN\n")
+                    tunning=200
+                    lim=tunning/40
+                elif(vive_buttons['trackpad_pressed'] and vive_buttons['trackpad_y']>0.8):
+                    print("Coarse mode")
+                    #f.write("COARSE MODE\n")
+                    tunning=350
+                    lim=tunning/20
                 if(f.closed):
                     filename = os.path.join(final_directory, "coords" + str(num_paths) + ".txt")   
                     f = open(filename, "w+") #Open new text file in write mode
@@ -201,7 +236,7 @@ def main():
                 f=teaching_mode(v,controller,f, interval)
             if(currMode==modes[1] or currMode==modes[3]):
                 if(not f.closed):
-                    f.close() 
+                    f.close()
             if(currMode=="Replicating"):
                 replication_mode(filename)
                 currMode=switchMode(modes,currMode)
