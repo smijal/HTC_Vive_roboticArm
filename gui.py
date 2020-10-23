@@ -20,6 +20,7 @@ import code_htc
 system_ON = False
 modes = ['Teaching', 'Save', 'Replicating', 'Stop']
 currMode = modes[1]
+delay = 2
 
 #Vive controller and tracker objects
 v = triad_openvr.triad_openvr()
@@ -35,9 +36,9 @@ current_posX = vive_position[0]
 current_posY = vive_position[1]
 current_posZ = vive_position[2]
 robot_position = [-310.0,303.0,170.0]
-# a = arm.StArm()
-# a.move_to(robot_position)
-# a.rotate_hand(30.0)
+a = arm.StArm()
+a.move_to(robot_position)
+a.rotate_hand(30.0)
 
 rest_time=0.2
 tunning = 400
@@ -63,13 +64,13 @@ f = open(filename, "w+") #collects the co-ords in a text file.
 
 #interval frequency for coordinates to be scanned from Vive (Can be manipulated) 
 if len(sys.argv) == 1:
-    interval = 1/250
+    interval = 1/10
 elif len(sys.argv) == 2:
     interval = 1/float(sys.argv[1])
 else:
     print("Invalid number of arguments")
     interval = False
-
+print("interval is " + str(interval))
 #-------------------------------------------------------------
 # This function focuses on collecting the co-ordinates and sending the co-ordinates to the robot for visual input.
 # The co-ordinates are more over stored in a text file so that we can call the Replication function later.
@@ -94,11 +95,25 @@ def teaching_mode(v,obj,f, interval):
         if( (abs(displacementX*tunning) < lim) and (abs(displacementY*tunning)<lim) and (abs(displacementZ*tunning)<lim) ):
             print("Displacement too small")
         else:
-            robot_position[0] = round(robot_position[0]+displacementX*tunning, 1)
-            robot_position[1] = round(robot_position[1]+displacementY*tunning,1)
-            robot_position[2] = round(robot_position[2]+displacementZ*tunning,1)
+            x = round(robot_position[0]+displacementX*(tunning+200), 1)
+            y = round(robot_position[1]+displacementY*tunning,1)
+            z = round(robot_position[2]+displacementZ*(tunning+100),1)
+
+            if(x>-400.0 and x<300.0):
+                robot_position[0] = x
+            else:
+                print("X-axis reaches its limit...")
+            if(y>200.0 and y<400.0):
+                robot_position[1] = y
+            else:
+                print("Y-axis reaches its limit...")
+            if(z>0.0 and z<300.0):
+                robot_position[2] = z
+            else:
+                print("Z-axis reaches its limit...")
             try:
-                #a.move_to(robot_position)
+                #a.smooth()
+                a.move_to(robot_position)
                 print(robot_position)
                 txt=""
                 for each in robot_position:
@@ -149,6 +164,7 @@ def teaching_mode(v,obj,f, interval):
 # Returns:  None
 #------------------------------------------------
 def replication_mode(txt):
+    #TODO fist place it to the home position , then start replicating
     f = open(txt, 'r') 
     Lines = f.readlines()
     if(not Lines):
@@ -206,11 +222,12 @@ def switchMode(modes, currMode):
 #-------------------------------------------------- 
 def main():
     #TODO: Instead of printing on the console, print on the GUI Window
-    global robot_position, system_ON, modes, currMode, num_paths, v, controller, final_directory, interval, filename, f, filepath_document
+    global robot_position, system_ON, modes, currMode, num_paths, v, controller, final_directory, interval, filename, f, filepath_document, delay
     if root.poll:
-        root.after(2,main)
+        root.after(delay,main)
     #Main controll, polling and wait for Vive button triggers to perform different functionalities
     if(interval):
+        start=time.time()
         vive_buttons = controller.get_controller_inputs() #Calling the method for htc inputs  
         if(vive_buttons['menu_button']): 
             time.sleep(0.3)
@@ -222,13 +239,15 @@ def main():
                 if(vive_buttons['trackpad_pressed'] and vive_buttons['trackpad_y']<-0.8):
                     print("Fine grain")
                     #f.write("FINE GRAIN\n")
-                    tunning=200
-                    lim=tunning/40
+                    tunning=400
+                    lim=tunning/200
+                    delay=4
                 elif(vive_buttons['trackpad_pressed'] and vive_buttons['trackpad_y']>0.8):
                     print("Coarse mode")
                     #f.write("COARSE MODE\n")
-                    tunning=350
-                    lim=tunning/20
+                    tunning=400
+                    lim=tunning/100
+                    delay=8
                 if(f.closed):
                     filename = os.path.join(final_directory, "coords" + str(num_paths) + ".txt")   
                     f = open(filename, "w+") #Open new text file in write mode
@@ -242,7 +261,9 @@ def main():
                 currMode=switchMode(modes,currMode)
         else:
             print("System is OFF, press the MENU button to turn it ON", end='\r')
-
+        sleep_time = interval-(time.time()-start)
+        if sleep_time>0:
+            time.sleep(sleep_time)
 
 #################################### GUI FUNCTIONS AND CONTROLLS ###########################################
 #stop function to stop the GUI

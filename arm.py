@@ -15,6 +15,7 @@ DEFAULT_TIMEOUT = 0.1
 CR = str.encode('\r')
 LF = str.encode('\n')
 
+SMOOTH = str.encode('SMOOTH')
 PURGE = str.encode('PURGE')
 ROBOFORTH = str.encode('ROBOFORTH')
 DECIMAL = str.encode('DECIMAL')
@@ -114,6 +115,12 @@ In [36]:
         self.cxn.flushInput()
         self.cxn.write(cmd + CR)
         self.block_on_result(cmd)
+
+    def smooth(self):
+        cmd = SMOOTH
+        print('Smooth...')
+        self.cxn.flushInput()
+        self.cxn.write(cmd + CR)
 
     def decimal(self):
         print('Setting decimal mode...')
@@ -220,12 +227,15 @@ In [36]:
         self.block_on_result(cmd)
 
     def move_to(self, pos, block=True):
-        cmd = str(pos[0]) + ' ' + str(pos[1]) + ' ' + str(pos[2]) + ' MOVETO'
-        self.cxn.flushInput()
-        self.cxn.write(cmd.encode() + CR)
-        if block:
-            self.block_on_result(cmd)
-            self.where()
+        try:
+            cmd = str(pos[0]) + ' ' + str(pos[1]) + ' ' + str(pos[2]) + ' MOVETO'
+            self.cxn.flushInput()
+            self.cxn.write(cmd.encode() + CR)
+            if block:
+                self.block_on_result(cmd)
+                self.where()
+        except:
+            print('Error in the move_to function...',pos)
 
     def move(self, del_pos):
         cmd = str(del_pos[0]) + ' ' + str(del_pos[1]) + ' ' + str(del_pos[2]) + ' MOVE'
