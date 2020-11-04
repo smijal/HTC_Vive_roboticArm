@@ -41,6 +41,9 @@ RESERVE = str.encode('RESERVE')
 OK = str.encode('OK')
 GRIP = str.encode('GRIP')
 UNGRIP = str.encode('UNGRIP')
+WAIST = str.encode('WAIST')
+SHOULDER = str.encode('SHOULDER')
+ELBOW = str.encode('ELBOW')
 
 
 class StPosCart():
@@ -246,6 +249,26 @@ In [36]:
 
     def rotate_wrist(self, roll):
         cmd = TELL.decode() + ' ' + WRIST.decode() + ' ' + str(roll) + ' ' + MOVETO.decode()
+        self.cxn.flushInput()
+        self.cxn.write(cmd.encode() + CR)
+        self.block_on_result(cmd)
+
+    def rotate_waist(self, increment):
+        #self.joint()
+        cmd = TELL.decode() + ' ' + WAIST.decode() + ' ' + str(increment) + ' ' + MOVE.decode()
+        self.cxn.flushInput()
+        self.cxn.write(cmd.encode() + CR)
+        self.block_on_result(cmd)
+        #self.cartesian()
+
+    def rotate_elbow(self, increment):
+        cmd = TELL.decode() + ' ' + ELBOW.decode() + ' ' + str(increment) + ' ' + MOVE.decode()
+        self.cxn.flushInput()
+        self.cxn.write(cmd.encode() + CR)
+        self.block_on_result(cmd)
+    
+    def rotate_shoulder(self, increment):
+        cmd = TELL.decode() + ' ' + SHOULDER.decode() + ' ' + str(increment) + ' ' + MOVETO.decode()
         self.cxn.flushInput()
         self.cxn.write(cmd.encode() + CR)
         self.block_on_result(cmd)

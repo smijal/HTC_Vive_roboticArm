@@ -1,3 +1,14 @@
+import tkinter as tk
+from tkinter import * 
+import os
+from PIL import Image,ImageTk
+import triad_openvr
+import time
+import sys
+import arm
+import code_htc
+
+
 # -*- coding: utf-8 -*-
 """
 Created on Wed Oct 14 23:29:17 2020
@@ -21,6 +32,7 @@ system_ON = False
 modes = ['Teaching', 'Save', 'Replicating', 'Stop']
 currMode = modes[1]
 delay = 2
+move_states = 0 #can go 0 1 2 -> 0 is move x , 1 is move y , 2 is move z
 
 #Vive controller and tracker objects
 v = triad_openvr.triad_openvr()
@@ -40,9 +52,9 @@ a = arm.StArm()
 a.move_to(robot_position)
 a.rotate_hand(30.0)
 
-rest_time=0.2
+rest_time=0
 tunning = 400
-lim = tunning/20
+lim = 10
 
 #To create a new directory for saving the different coordinate files
 current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -81,49 +93,69 @@ print("interval is " + str(interval))
 #-------------------------------------------------------------
 def teaching_mode(v,obj,f, interval):
     #start = time.time()
-    global current_posX,current_posY, current_posZ, robot_position, rest_time,tunning,lim
-    vive_position = v.devices["controller_1"].get_pose_euler()
-    if(vive_position==None):
-        print("Vive can't read, make sure the controller and the base station can communicate...")
-    else:
-        displacementX = current_posX-vive_position[0]
-        displacementY = current_posY-vive_position[1]
-        displacementZ = current_posZ-vive_position[2]
-        current_posX = vive_position[0]
-        current_posY = vive_position[1]
-        current_posZ = vive_position[2]
-        if( (abs(displacementX*tunning) < lim) and (abs(displacementY*tunning)<lim) and (abs(displacementZ*tunning)<lim) ):
-            print("Displacement too small")
-        else:
-            x = round(robot_position[0]+displacementX*(tunning+200), 1)
-            y = round(robot_position[1]+displacementY*tunning,1)
-            z = round(robot_position[2]+displacementZ*(tunning+100),1)
+	global current_posX,current_posY, current_posZ, robot_position, rest_time,tunning,lim,move_states
+	vive_position = v.devices["controller_1"].get_pose_euler()
+	if(vive_position==None):
+		print("Vive can't read, make sure the controller and the base station can communicate...")
+	else:
+		displacementX = current_posX-vive_position[0]
+		#print(round(displacementX,1)*1000)
+		displacementY = current_posY-vive_position[1]
+		print(round(displacementY,1)*1000)
+		displacementZ = current_posZ+vive_position[2]
+		#print(round(displacementZ,1)*-1000)
+		#displacements = [displacementX*1000,displacementY*1000,displacementZ*1000]
+		#print(displacements)
+		current_posX = vive_position[0]
+		current_posY = vive_position[1]
+		current_posZ = vive_position[2]
+		if( (abs(displacementX*tunning) < lim) and (abs(displacementY*tunning)<lim) and (abs(displacementZ*tunning)<lim) ):
+			print("Displacement too small")
+		else:
+			x = round(robot_position[0]+displacementX*(tunning+200), 1)
+			y = round(robot_position[1]+displacementY*tunning,1)
+			z = round(robot_position[2]+displacementZ*(tunning+100),1)
 
-            if(x>-400.0 and x<300.0):
-                robot_position[0] = x
-            else:
-                print("X-axis reaches its limit...")
-            if(y>200.0 and y<400.0):
-                robot_position[1] = y
-            else:
-                print("Y-axis reaches its limit...")
-            if(z>0.0 and z<300.0):
-                robot_position[2] = z
-            else:
-                print("Z-axis reaches its limit...")
-            try:
-                #a.smooth()
-                a.move_to(robot_position)
-                print(a.where())
-                print(robot_position)
-                txt=""
-                for each in robot_position:
-                    txt += "%.1f" % each
-                    txt+=" "
-                #txt+=str(robot_position[0]) + ", " + str(robot_position[1]) + ", " + str(robot_position[2]) + "\n"
-                f.write(txt+'\n')
-            except:
-                print("Error in teaching function...")
+			if(x>-400.0 and x<300.0):
+				robot_position[0] = x
+			else:
+				print("X-axis reaches its limit...")
+			if(y>200.0 and y<400.0):
+				robot_position[1] = y
+			else:
+				print("Y-axis reaches its limit...")
+			if(z>0.0 and z<300.0):
+				robot_position[2] = z
+			else:
+				print("Z-axis reaches its limit...")
+			try:
+				#a.smooth()
+				# a.move_to(robot_position)
+				if(move_states==0):
+					a.rotate_waist(round(displacementX,1)*1000)
+					#print(a.where())
+					print("MOVING X")
+				elif(move_states==1):
+					#call rotation on the other joint
+					a.rotate_elbow(round(displacementY,1)*1000)
+					print("MOVING Y")
+					current_posZ = vive_position[2]
+				elif(move_states==2):
+					#call rotation on the other joint
+					print("MOVING Z")
+					dis = round(displacementZ,1)*1000
+					if(dis==-0.0):
+						dis = 0
+					a.rotate_shoulder(dis)
+				#print(robot_position)
+				txt=""
+				for each in robot_position:
+					txt += "%.1f" % each
+					txt+=" "
+				#txt+=str(robot_position[0]) + ", " + str(robot_position[1]) + ", " + str(robot_position[2]) + "\n"
+				f.write(txt+'\n')
+			except:
+				print("Error in teaching function...")
         
     # sleep_time = interval-(time.time()-start) 
     # if sleep_time>0:
@@ -137,7 +169,7 @@ def teaching_mode(v,obj,f, interval):
     # f.write(txt+'\n') #writes into the file 
     # robot_input = obj.get_controller_inputs() #Calling the method for htc inputs
 
-    time.sleep(rest_time)
+	time.sleep(rest_time)
     #     time.sleep(0.3)
     #     #st_robot.set_speed(1200)
         
@@ -156,7 +188,7 @@ def teaching_mode(v,obj,f, interval):
     #     #     print('Error in the teaching function')
     #     #     #call stop function
     #     #     #exit
-    return f
+	return f
 
 #st_robot is taken out
 #------------------------------------------------
@@ -215,120 +247,119 @@ def switchMode(modes, currMode):
             time.sleep(0.3)
             return currMode
         count+=1
-
 #--------------------------------------------------
 # Purpose: Main function, controlls the other function calls and operates the system
 # Parameters: None
 # Returns: None
 #-------------------------------------------------- 
 def main():
-    #TODO: Instead of printing on the console, print on the GUI Window
-    global robot_position, system_ON, modes, currMode, num_paths, v, controller, final_directory, interval, filename, f, filepath_document, delay
-    if root.poll:
-        root.after(delay,main)
-    #Main controll, polling and wait for Vive button triggers to perform different functionalities
-    if(interval):
-        start=time.time()
-        vive_buttons = controller.get_controller_inputs() #Calling the method for htc inputs  
-        if(vive_buttons['menu_button']): 
-            time.sleep(0.3)
-            system_ON=turn_ON_OFF(system_ON, currMode)
-        if(system_ON):
-            if(vive_buttons['grip_button']):
-                currMode=switchMode(modes,currMode)
-            if(currMode=="Teaching"):
-                if(vive_buttons['trackpad_pressed'] and vive_buttons['trackpad_y']<-0.8):
-                    print("Fine grain")
-                    #f.write("FINE GRAIN\n")
-                    tunning=400
-                    lim=tunning/200
-                    delay=2
-                elif(vive_buttons['trackpad_pressed'] and vive_buttons['trackpad_y']>0.8):
-                    print("Coarse mode")
-                    #f.write("COARSE MODE\n")
-                    tunning=400
-                    lim=tunning/100
-                    delay=2
-                if(f.closed):
-                    filename = os.path.join(final_directory, "coords" + str(num_paths) + ".txt")   
-                    f = open(filename, "w+") #Open new text file in write mode
-                    num_paths+=1
-                f=teaching_mode(v,controller,f, interval)
-            if(currMode==modes[1] or currMode==modes[3]):
-                if(not f.closed):
-                    f.close()
-            if(currMode=="Replicating"):
-                replication_mode(filename)
-                currMode=switchMode(modes,currMode)
-        else:
-            print("System is OFF, press the MENU button to turn it ON", end='\r')
-        sleep_time = interval-(time.time()-start)
-        if sleep_time>0:
-            time.sleep(sleep_time)
+	#TODO: Instead of printing on the console, print on the GUI Window
+	global robot_position, system_ON, modes, currMode, num_paths, v, controller, final_directory, interval, filename, f, filepath_document, delay, move_states
+	#Main controll, polling and wait for Vive button triggers to perform different functionalities
+	while True:
+		start=time.time()
+		vive_buttons = controller.get_controller_inputs() #Calling the method for htc inputs  
+		if(vive_buttons['menu_button']): 
+			time.sleep(0.3)
+			system_ON=turn_ON_OFF(system_ON, currMode)
+		if(system_ON):
+			if(vive_buttons['grip_button']):
+				currMode=switchMode(modes,currMode)
+			if(currMode=="Teaching"):
+				if(vive_buttons['trackpad_pressed'] and vive_buttons['trackpad_y']<-0.8):
+					print("Fine grain")
+					#f.write("FINE GRAIN\n")
+					tunning=400
+					lim=tunning/200
+					delay=2
+				elif(vive_buttons['trackpad_pressed'] and vive_buttons['trackpad_y']>0.8):
+					print("Coarse mode")
+					#f.write("COARSE MODE\n")
+					tunning=400
+					lim=tunning/100
+					delay=2
+				if(vive_buttons['trigger']>0.8):
+					move_states+=1
+					move_states%=3
+				if(f.closed):
+					filename = os.path.join(final_directory, "coords" + str(num_paths) + ".txt")   
+					f = open(filename, "w+") #Open new text file in write mode
+					num_paths+=1
+				f=teaching_mode(v,controller,f, interval)
+			if(currMode==modes[1] or currMode==modes[3]):
+				if(not f.closed):
+					f.close()
+			if(currMode=="Replicating"):
+				replication_mode(filename)
+				currMode=switchMode(modes,currMode)
+		else:
+			print("System is OFF, press the MENU button to turn it ON", end='\r')
+		sleep_time = interval-(time.time()-start)
+		if sleep_time>0:
+			time.sleep(sleep_time)
 
 #################################### GUI FUNCTIONS AND CONTROLLS ###########################################
-#stop function to stop the GUI
-def stop():
-    root.poll = False
-    print("Exiting the program!")
-    root.destroy() #closes the window
+# #stop function to stop the GUI
+# def stop():
+#     root.poll = False
+#     print("Exiting the program!")
+#     root.destroy() #closes the window
         
-#launches the Helper guide 
-def helper():
-    print('Help guide launching...')
-    os.startfile(filepath_document)
+# #launches the Helper guide 
+# def helper():
+#     print('Help guide launching...')
+#     os.startfile(filepath_document)
 
-#COM port setter
-#TODO: Check in person if this actually works
-# TODO: Write code that actually checks if connection is established 
-def comport():
-    global entry1
-    content = entry1.get()
-    if(content):
-        arm.DEFAULT_DEV = "COM" + str(content)
-    print('Connected to COM Port: ' + str(content))
-    print(arm.DEFAULT_DEV)
+# #COM port setter
+# #TODO: Check in person if this actually works
+# # TODO: Write code that actually checks if connection is established 
+# def comport():
+#     global entry1
+#     content = entry1.get()
+#     if(content):
+#         arm.DEFAULT_DEV = "COM" + str(content)
+#     print('Connected to COM Port: ' + str(content))
+#     print(arm.DEFAULT_DEV)
 
-root = tk.Tk() # instantiating the window
-entry1 = StringVar() #assigning a variable for the text entry
+# root = tk.Tk() # instantiating the window
+# entry1 = StringVar() #assigning a variable for the text entry
 
-root.poll = True #toggle variable
+# root.poll = True #toggle variable
 
-root.title('Motion Controll Robot GUI') #naming the window
-root.configure(background='black')
-root.minsize(width=100, height=100)
-root.geometry('450x500+0+0') #setting the size of the window 
-title = Label(root,text = 'Motion Controlled Robot',bg= 'black', fg = 'White',font = ('Verdana',27))
-title.pack(anchor = CENTER)
-
-
-#bringing the image. 
-print(current_directory)
-im_path = os.path.join(current_directory, 'pic.png')
-im = Image.open(im_path)
-im = im.resize((180, 180),Image.ANTIALIAS)
-ph = ImageTk.PhotoImage(im)
-image = Label(root, image=ph, highlightthickness = 0, bd = 0)
-image.pack(side = 'top')
+# root.title('Motion Controll Robot GUI') #naming the window
+# root.configure(background='black')
+# root.minsize(width=100, height=100)
+# root.geometry('450x500+0+0') #setting the size of the window 
+# title = Label(root,text = 'Motion Controlled Robot',bg= 'black', fg = 'White',font = ('Verdana',27))
+# title.pack(anchor = CENTER)
 
 
-coms = Label(root,bg ='black', fg = 'white', text = 'COM Port: ',font = ('Verdana',15))
-coms.pack(anchor = CENTER)
-Entry(root,width = 30,textvariable = entry1,justify = 'center').pack(anchor = CENTER)
+# #bringing the image. 
+# print(current_directory)
+# im_path = os.path.join(current_directory, 'pic.png')
+# im = Image.open(im_path)
+# im = im.resize((180, 180),Image.ANTIALIAS)
+# ph = ImageTk.PhotoImage(im)
+# image = Label(root, image=ph, highlightthickness = 0, bd = 0)
+# image.pack(side = 'top')
 
-coms_button = Button(root,text = 'OK',width = 9, height = 1,command = comport)
-coms_button.pack(anchor = CENTER,padx = 2, pady = 3)
 
-steam = Button(root,text = 'Run Program',bg = 'Green',command = main)
-steam.place(x = 90, y = 320,width = 100, height = 50)
+# coms = Label(root,bg ='black', fg = 'white', text = 'COM Port: ',font = ('Verdana',15))
+# coms.pack(anchor = CENTER)
+# Entry(root,width = 30,textvariable = entry1,justify = 'center').pack(anchor = CENTER)
 
-stop_btn = Button(root,text = 'STOP',bg = 'Red',command = stop)
-stop_btn.place(x = 250, y = 320,width = 100, height = 50)
+# coms_button = Button(root,text = 'OK',width = 9, height = 1,command = comport)
+# coms_button.pack(anchor = CENTER,padx = 2, pady = 3)
 
-help_btn = Button(root,text = 'Help Guide',command = helper)
-help_btn.place(x = 170, y = 390,width = 100, height = 50)
+# steam = Button(root,text = 'Run Program',bg = 'Green',command = main)
+# steam.place(x = 90, y = 320,width = 100, height = 50)
 
-root.mainloop()
+# stop_btn = Button(root,text = 'STOP',bg = 'Red',command = stop)
+# stop_btn.place(x = 250, y = 320,width = 100, height = 50)
 
-# if __name__ == "__main__":
-#    main()
+# help_btn = Button(root,text = 'Help Guide',command = helper)
+# help_btn.place(x = 170, y = 390,width = 100, height = 50)
+
+# root.mainloop()
+if __name__ == '__main__':
+	main()

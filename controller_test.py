@@ -14,7 +14,7 @@ else:
     print("Invalid number of arguments")
     interval = False
 
-print(interval)
+#print(interval)
 
 if interval:
     while(True):
