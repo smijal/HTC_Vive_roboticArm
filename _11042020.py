@@ -48,13 +48,13 @@ current_posX = vive_position[0]
 current_posY = vive_position[1]
 current_posZ = vive_position[2]
 robot_position = [-310.0,303.0,170.0]
-a = arm.StArm()
-a.move_to(robot_position)
-a.rotate_hand(30.0)
+# a = arm.StArm()
+# a.move_to(robot_position)
+# a.rotate_hand(30.0)
 
 rest_time=0
-tunning = 400
-lim = 10
+tunning = 4000 #ideal tunning for now 400
+lim = 10 #limit was 10
 
 #To create a new directory for saving the different coordinate files
 current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -99,11 +99,8 @@ def teaching_mode(v,obj,f, interval):
 		print("Vive can't read, make sure the controller and the base station can communicate...")
 	else:
 		displacementX = current_posX-vive_position[0]
-		#print(round(displacementX,1)*1000)
 		displacementY = current_posY-vive_position[1]
-		print(round(displacementY,1)*1000)
-		displacementZ = current_posZ+vive_position[2]
-		#print(round(displacementZ,1)*-1000)
+		displacementZ = current_posZ-vive_position[2]
 		#displacements = [displacementX*1000,displacementY*1000,displacementZ*1000]
 		#print(displacements)
 		current_posX = vive_position[0]
@@ -116,37 +113,40 @@ def teaching_mode(v,obj,f, interval):
 			y = round(robot_position[1]+displacementY*tunning,1)
 			z = round(robot_position[2]+displacementZ*(tunning+100),1)
 
-			if(x>-400.0 and x<300.0):
-				robot_position[0] = x
-			else:
-				print("X-axis reaches its limit...")
-			if(y>200.0 and y<400.0):
-				robot_position[1] = y
-			else:
-				print("Y-axis reaches its limit...")
-			if(z>0.0 and z<300.0):
-				robot_position[2] = z
-			else:
-				print("Z-axis reaches its limit...")
+			# if(x>-400.0 and x<300.0):
+			# 	robot_position[0] = x
+			# else:
+			# 	print("X-axis reaches its limit...")
+			# if(y>200.0 and y<400.0):
+			# 	robot_position[1] = y
+			# else:
+			# 	print("Y-axis reaches its limit...")
+			# if(z>0.0 and z<300.0):
+			# 	robot_position[2] = z
+			# else:
+			# 	print("Z-axis reaches its limit...")
 			try:
 				#a.smooth()
 				# a.move_to(robot_position)
 				if(move_states==0):
-					a.rotate_waist(round(displacementX,1)*1000)
+					#a.rotate_waist(round(displacementX,1)*1000)
 					#print(a.where())
 					print("MOVING X")
+					print(round(displacementX,1)*1000)
 				elif(move_states==1):
 					#call rotation on the other joint
-					a.rotate_elbow(round(displacementY,1)*1000)
+					#a.rotate_elbow(round(displacementY,1)*1000)
 					print("MOVING Y")
-					current_posZ = vive_position[2]
+					print(round(displacementY,1)*1000)
+					#current_posZ = vive_position[2]
 				elif(move_states==2):
 					#call rotation on the other joint
 					print("MOVING Z")
 					dis = round(displacementZ,1)*1000
+					print(dis)
 					if(dis==-0.0):
 						dis = 0
-					a.rotate_shoulder(dis)
+					#a.rotate_shoulder(dis)
 				#print(robot_position)
 				txt=""
 				for each in robot_position:

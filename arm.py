@@ -124,6 +124,9 @@ In [36]:
         print('Smooth...')
         self.cxn.flushInput()
         self.cxn.write(cmd + CR)
+        self.block_on_result(cmd)
+        
+
 
     def decimal(self):
         print('Setting decimal mode...')
@@ -204,9 +207,10 @@ In [36]:
     def get_speed(self):
         cmd = SPEED + QUERY
         self.cxn.flushInput()
-        self.cxn.write(cmd.encode() + CR)
+        self.cxn.write(cmd + CR)
         result = self.block_on_result(cmd)
-        return int(result.split(' ')[-2])
+        print(result)
+        # return int(result.split(' ')[-2])
 
     def set_speed(self, speed):
         cmd = str(speed) + ' ' + SPEED.decode() + IMPERATIVE.decode()
@@ -268,7 +272,7 @@ In [36]:
         self.block_on_result(cmd)
     
     def rotate_shoulder(self, increment):
-        cmd = TELL.decode() + ' ' + SHOULDER.decode() + ' ' + str(increment) + ' ' + MOVETO.decode()
+        cmd = TELL.decode() + ' ' + SHOULDER.decode() + ' ' + str(increment) + ' ' + MOVE.decode()
         self.cxn.flushInput()
         self.cxn.write(cmd.encode() + CR)
         self.block_on_result(cmd)
@@ -335,3 +339,24 @@ In [36]:
 
         return (self.curr_pos, self.prev_pos)
 
+    def where_position(self):
+        self.cartesian()
+        cmd = WHERE
+        self.cxn.flushInput()
+        self.cxn.write(cmd + CR)
+        res = self.block_on_result(cmd)
+        try:
+            lines = res.split('\r\n'.encode())
+
+            cp = [int(x.strip().replace('.', ''))
+                  for x in shlex.split(lines[2].decode())]
+
+            self.curr_pos.set(cp)
+
+        except RuntimeError as e:
+            print('Exception in where.')
+            print(e)
+            self.curr_pos.set([0, 0, 0, 0, 0])
+            self.prev_pos.set([0, 0, 0, 0, 0])
+
+        return [float(cp[0])/10, float(cp[1])/10, float(cp[2])/10]
