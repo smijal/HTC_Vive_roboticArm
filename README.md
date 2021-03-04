@@ -1,14 +1,20 @@
 # HTC Vive controlled robotic Arm (ST Robotics R17)
 
-### Video with a full explanation:
-https://www.youtube.com/watch?v=tr84YwzHvdM
+### Content
+- [Video explanation](#video-with-a-full-explanation)
+- [Getting started](#getting-started)
 
-### Getting Started
+### **Video with a full explanation:**
+- [HTC Vive controlled robotic arm (ST Robotics R17)](https://www.youtube.com/watch?v=tr84YwzHvdM)
 
-### Configuration file
+### **Getting Started**
 
-### Contributors
+### **Configuration file**
+
+### **Contributors**
 - [Stefan Mijalkov](https://smijal.github.io/)
 - Joshua Zychal
 - Lohith Muppala
 - Ali Kazmi
+
+### **References**
