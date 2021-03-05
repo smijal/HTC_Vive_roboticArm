@@ -10,46 +10,40 @@
 ### **Getting Started**
 
 1. Clone the repository
-2. Fork
-3. Install dependencies
-4. Install Steam
-5. Change the config file
+2. Install dependencies
+3. Install Steam
+4. Change the config file
 
-**Dependencies:**
-import tkinter as tk
-from tkinter import * 
-import os
-from PIL import Image,ImageTk
-import time
-import sys
-import arm
-from pydub import AudioSegment
-from pydub.playback import play
-import serial as s
-import shlex
-import time
-import time
-import sys
-import openvr
-import math
-import json
-import tkinter as tk
-import os
-from tkinter import * 
-from PIL import Image,ImageTk
-import subprocess as sp
-import sys
+**Imports:**
+```
+pip install python-tk
+pip install Pillow
+pip install openvr
+pip install pydub
+pip install serial
 
+NOTE: Few libraries might not be listed.
+```
 
+**Install SteamVR**
+
+Follow the [guide](https://www.acer.com/ac/en/US/content/windows-mixed-reality-setup-steamvr) for installation.
 
 ### **Configuration file**
 
-
+In order to run SteamVR without a headset, config file has to be changed.
+Follow the path, find and edit the default.vrsettings file in ProgramFiles ->
+...steamapps/common/SteamVR/resources/settings/default.vrsettings
+Set requireHmd to FALSE.
+![image](https://user-images.githubusercontent.com/65141613/110067189-cb74c480-7d38-11eb-8cfe-9b1578b6ddcf.png)
 
 ### **Contributors**
 - [Stefan Mijalkov](https://smijal.github.io/)
-- Joshua Zychal
-- Lohith Muppala
+- [Joshua Zychal](https://www.linkedin.com/in/josh-zychal-1a4278191/)
+- [Lohith Muppala](https://www.linkedin.com/in/lohithmuppala/)
 - Ali Kazmi
 
 ### **References**
+- [TriadSemi/triad_openvr](https://github.com/TriadSemi/triad_openvr)
+- [OlinRoboticsAndBioinspiration/st](https://github.com/OlinRoboticsAndBioinspiration/st/blob/master/st.py)
+- [ST Robotics](https://strobotics.com/info2.htm)
