@@ -4,6 +4,7 @@
 - [Video explanation](#video-with-a-full-explanation)
 - [Getting started](#getting-started)
 - [Configuration file](#configuration-file)
+- [Run](#run)
 - [Hardware schematics](#hardware-schematics)
 - [Contributors](#contributors)
 - [References](#references)
@@ -42,10 +43,18 @@ Follow the [guide](https://www.acer.com/ac/en/US/content/windows-mixed-reality-s
 
 In order to run SteamVR without a headset, config file has to be changed.
 Follow the path, find and edit the default.vrsettings file in ProgramFiles ->
-...steamapps/common/SteamVR/resources/settings/default.vrsettings
+`...steamapps/common/SteamVR/resources/settings/default.vrsettings`
+
 Set requireHmd to FALSE.
+
 ![image](https://user-images.githubusercontent.com/65141613/110067189-cb74c480-7d38-11eb-8cfe-9b1578b6ddcf.png)
 
+
+
+### **Run**
+
+1. Run the program_launcher.py
+1. Follow the GUI
 
 
 ### **Hardware schematics**
