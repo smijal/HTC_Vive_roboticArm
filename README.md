@@ -3,7 +3,10 @@
 ### Content
 - [Video explanation](#video-with-a-full-explanation)
 - [Getting started](#getting-started)
-- []()
+- [Configuration file](#configuration-file)
+- [Hardware schematics](#hardware-schematics)
+- [Contributors](#contributors)
+- [References](#references)
 
 ### **Video with a full explanation:**
 - [HTC Vive controlled robotic arm (ST Robotics R17)](https://www.youtube.com/watch?v=tr84YwzHvdM)
@@ -38,7 +41,7 @@ Follow the path, find and edit the default.vrsettings file in ProgramFiles ->
 Set requireHmd to FALSE.
 ![image](https://user-images.githubusercontent.com/65141613/110067189-cb74c480-7d38-11eb-8cfe-9b1578b6ddcf.png)
 
-## **Hardware schematics**
+### **Hardware schematics**
 
 ![image](https://user-images.githubusercontent.com/65141613/110068133-a6815100-7d3a-11eb-8017-9875347dde6a.png)
 
