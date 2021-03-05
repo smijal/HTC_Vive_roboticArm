@@ -18,6 +18,8 @@
 3. Install Steam
 4. Change the config file
 
+
+
 **Imports:**
 ```
 pip install python-tk
@@ -29,9 +31,12 @@ pip install serial
 NOTE: Few libraries might not be listed.
 ```
 
+
 **Install SteamVR**
 
 Follow the [guide](https://www.acer.com/ac/en/US/content/windows-mixed-reality-setup-steamvr) for installation.
+
+
 
 ### **Configuration file**
 
@@ -40,6 +45,8 @@ Follow the path, find and edit the default.vrsettings file in ProgramFiles ->
 ...steamapps/common/SteamVR/resources/settings/default.vrsettings
 Set requireHmd to FALSE.
 ![image](https://user-images.githubusercontent.com/65141613/110067189-cb74c480-7d38-11eb-8cfe-9b1578b6ddcf.png)
+
+
 
 ### **Hardware schematics**
 
@@ -52,6 +59,8 @@ Set requireHmd to FALSE.
 - [Joshua Zychal](https://www.linkedin.com/in/josh-zychal-1a4278191/)
 - [Lohith Muppala](https://www.linkedin.com/in/lohithmuppala/)
 - Ali Kazmi
+
+
 
 ### **References**
 - [TriadSemi/triad_openvr](https://github.com/TriadSemi/triad_openvr)
